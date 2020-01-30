@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
+title: The World of Kevin Gao
+subtitle: '咋瓦鲁多'
 description: ''
-keywords:
-author: John Doe
+keywords: 
+author: Kevin Gao
 language: en
 timezone: ''
 
@@ -40,7 +40,7 @@ external_link:
   exclude: ''
 filename_case: 0
 render_drafts: false
-post_asset_folder: false
+post_asset_folder: ture
 relative_link: false
 future: true
 highlight:
@@ -59,7 +59,7 @@ index_generator:
   order_by: -date
 
 # Category & Tag
-default_category: uncategorized
+default_category: categorized
 category_map:
 tag_map:
 
@@ -96,4 +96,16 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: ''
+  type: git
+  repo: git@github.com:guokedashuaige/guokedashuaige.github.io.git
+  branch: master
+
+math:
+  engine: 'mathjax' # or 'katex'
+  mathjax:
+    # src: custom_mathjax_source
+    config:
+      # MathJax config
+
+mathjax:
+  enable: true
