@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="The World of Kevin Gao" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文对SQL内容进行了一些梳理来源声明：来源来自日本MICK所著的SQL教程，有能力的请去社区支持正版，文末附有电子书供学习使用 绪论-搭建SQL的学习环境PostgreSQL的安装和连接设置从 PostgreSQL官网 下载合适自己设备的版本如果仅供本地使用在 C:\Program Files\PostgreSQL\9.5\data 路径中将 1listen_addresses &#x3D; &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL基础篇">
+<meta property="og:url" content="http://yoursite.com/2020/01/02/SQL1/index.html">
+<meta property="og:site_name" content="The World of Kevin Gao">
+<meta property="og:description" content="本文对SQL内容进行了一些梳理来源声明：来源来自日本MICK所著的SQL教程，有能力的请去社区支持正版，文末附有电子书供学习使用 绪论-搭建SQL的学习环境PostgreSQL的安装和连接设置从 PostgreSQL官网 下载合适自己设备的版本如果仅供本地使用在 C:\Program Files\PostgreSQL\9.5\data 路径中将 1listen_addresses &#x3D; &amp;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-01-02T02:16:02.000Z">
+<meta property="article:modified_time" content="2020-01-30T19:53:58.000Z">
+<meta property="article:author" content="Kevin Gao">
+<meta property="article:tag" content="SQL">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/01/02/SQL1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>SQL基础篇 | The World of Kevin Gao</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">The World of Kevin Gao</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">咋瓦鲁多</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/02/SQL1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Kevin Gao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The World of Kevin Gao">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SQL基础篇<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/SQL1.md" class="post-edit-link" title="Edit this post" rel="noopener" target="_blank"><i class="fa fa-pencil"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-01-02 10:16:02" itemprop="dateCreated datePublished" datetime="2020-01-02T10:16:02+08:00">2020-01-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-31 03:53:58" itemprop="dateModified" datetime="2020-01-31T03:53:58+08:00">2020-01-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
+                    <span itemprop="name">CS数据库</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文对SQL内容进行了一些梳理<br><strong>来源声明</strong>：<br>来源来自日本MICK所著的SQL教程，有能力的请去社区支持正版，文末附有电子书供学习使用</p>
+<h1 id="绪论-搭建SQL的学习环境"><a href="#绪论-搭建SQL的学习环境" class="headerlink" title="绪论-搭建SQL的学习环境"></a>绪论-搭建SQL的学习环境</h1><h2 id="PostgreSQL的安装和连接设置"><a href="#PostgreSQL的安装和连接设置" class="headerlink" title="PostgreSQL的安装和连接设置"></a>PostgreSQL的安装和连接设置</h2><p>从 <a href="https://www.enterprisedb.com/downloads/postgresql" target="_blank" rel="noopener">PostgreSQL官网</a> 下载合适自己设备的版本<br>如果仅供本地使用<br>在 C:\Program Files\PostgreSQL\9.5\data 路径中将</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listen_addresses &#x3D; &#39;*&#39;</span><br></pre></td></tr></table></figure>
+<p>修改为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listen_addresses &#x3D; &#39;localhost&#39;</span><br></pre></td></tr></table></figure>
+<p>登录SQL<br>打开cmd<br>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\PostgreSQL\9.5\bin\psql.exe –U postgres</span><br></pre></td></tr></table></figure>
+<p>窗口显示出“postgres=#”，意味着连接成功了。 下面就可以执行 SQL 语句了。</p>
+<p><strong>创建学习使用的数据库</strong><br>1. 执行创建数据库的SQL语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE shop;</span><br></pre></td></tr></table></figure>
+<p>2. 结束psql<br>数据库创建成功之后，结束 psql。为了结束 psql， 需要输入“\q”，然后按下回车键。这样就切断了与 postgreSQL 的连接，返回到命令提示符窗口</p>
+<p><strong>连接学习用的数据库（登录）</strong><br>登录上一步输入的shop</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\PostgreSQL\9.5\bin\psql.exe –U postgres –d shop</span><br></pre></td></tr></table></figure>
+<p>d是指定某一个数据库的意思 </p>
+<h1 id="数据库和SQL"><a href="#数据库和SQL" class="headerlink" title="数据库和SQL"></a>数据库和SQL</h1><a id="more"></a>
+<h2 id="数据库是什么"><a href="#数据库是什么" class="headerlink" title="数据库是什么"></a>数据库是什么</h2><pre><code>● 数据库是将大量数据保存起来，通过计算机加工而成的可以进行高效访问 的数据集合。    ● 用来管理数据库的计算机系统称为数据库管理系统（DBMS）。    ● 通过使用DBMS，多个用户便可安全、简单地操作大量数据。    ● 数据库有很多种类，本书将介绍如何使用专门的SQL语言来操作关系数 据库。    ● 关系数据库通过关系数据库管理系统（RDBMS）进行管理。</code></pre><p>DBMS种类：<br>层次数据库（Hierarchical Database，HDB） 最古老的数据库之一，它把数据通过层次结构（树形结构）的方式表现出来。<br>关系数据库（Relational Database，RDB），和 Excel 工作表一样，它也采用由行和列组成的二维表来 管理数据，所以简单易懂，还使用专门的 SQL（Structured Query Language，结构化查询语言）对数据进行操作。<br>面向对象数据库（Object Oriented Database，OODB） 编程语言当中有一种被称为面向对象语言的语言。把数据以及对数据的操作集合起来以对象为单位进行管理，因此得名。面向对象数据库就是用来保存这些对象的数据库。<br>XML数据库（XML Database，XMLDB） 最近几年，XML作为在网络上进行交互的数据的形式逐渐普及起来。 XML 数据库可以对 XML 形式的大量数据进行高速处理。<br>键值存储系统（Key-Value Store，KVS） 这是一种单纯用来保存查询所使用的主键（Key）和值（Value）的组 合的数据库。可以把它想象成关联数组或者散列 （hash）。近年来，随着键值存储系统被应用到Google 等需要对大量数据 进行超高速查询的 Web 服务当中，它正逐渐为人们所关注。</p>
+<h2 id="数据库的结构"><a href="#数据库的结构" class="headerlink" title="数据库的结构"></a>数据库的结构</h2><p>● RDBMS通常使用客户端/服务器这样的系统结构。    ● 通过从客户端向服务器端发送SQL语句来实现数据库的读写操作。    ● 关系数据库采用被称为数据库表的二维表来管理数据。    ● 数据库表由表示数据项目的列（字段）和表示一条数据的行（记录）所组 成，以记录为单位进行数据读写。    ● 本书将行和列交汇的方格称为单元格，每个单元格只能输入一个数据。</p>
+<h2 id="SQL概要"><a href="#SQL概要" class="headerlink" title="SQL概要"></a>SQL概要</h2><p>● SQL是为操作数据库而开发的语言。    ● 虽然SQL也有标准，但实际上根据RDBMS的不同SQL也不尽相同。    ● SQL通过一条语句来描述想要进行的操作，发送给RDBMS。    ● 原则上SQL语句都会使用分号结尾。    ● SQL根据操作目的可以分为DDL、DML和DCL。<br>SQL 用关键字、表名、列名等组合而成的一条语句（SQL 语句）来 描述操作的内容。关键字是指那些含义或使用方法已事先定义好的英语单<br>词，存在包含“对表进行查询”或者“参考这个表”等各种意义的关键字。 根据对 RDBMS 赋予的指令种类的不同，SQL 语句可以分为以下三类。<br>●DDL<br>    DDL（Data    Definition    Language，数据定义语言）        用来创建或者删除存储 数据用的数据库以及数据库中的表等对象。DDL 包含以下几种指令。<br>CREATE：<br> 创建数据库和表等对象 DROP： 删除数据库和表等对象 ALTER： 修改数据库和表等对象的结构<br>●DML<br>    DML（Data    Manipulation    Language，数据操纵语言）        用来查询或者变更 表中的记录。DML 包含以下几种指令。<br>SELECT：查询表中的数据 INSERT：向表中插入新数据 UPDATE：更新表中的数据 DELETE：删除表中的数据<br>●DCL<br>    DCL（Data    Control    Language，数据控制语言）        用来确认或者取消对数据 库中的数据进行的变更。除此之外，还可以对 RDBMS的用户是否有权限 操作数据库中的对象（数据库表等）进行设定。DCL 包含以下几种指令。<br>COMMIT： 确认对数据库中的数据进行的变更 ROLLBACK：<br> 取消对数据库中的数据进行的变更 GRANT： 赋予用户操作权限 REVOKE： 取消用户的操作权限<br>实际使用的 SQL 语句当中有 90% 属于 DML</p>
+<p><strong>SQL的基本书写规则</strong><br>■SQL语句要以分号（;）结尾<br>■SQL语句不区分大小写<br>为了理解方便●    关键字大写 ●    表名的首字母大写 ●    其余（列名等）小写<br>插入到表中的数据是区分大小写的。例如，在操作过程中，数据 Computer、COMPUTER 或computer，三者是不一样的。<br>■常数的书写方式是固定的<br>字符串和日期常数需要使用单引号（’）括起来。 数字常数无需加注单引号（直接书写数字即可）。<br>■单词需要用半角空格或者换行来分隔<br>单词之间需要使用半角空格或者换行符进行分隔。<br><strong>表的创建</strong><br>● 表通过CREATE TABLE语句创建而成。    ● 表和列的命名要使用有意义的文字。    ● 指定列的数据类型（整数型、字符型和日期型等）。    ● 可以在表中设置约束（主键约束和NOT NULL约束等）。<br><strong>命名规则</strong><br>数据库名称、表名和列名等可以使用以下三种字符。    ●    半角英文字母　　●    半角数字　　●    下划线（_）<br>此外，名称必须以半角英文字母开头。<br>名称不能重复。<br>删除表/列：DROP + 表/列的名字<br>表定义的更新：ALTER TABLE 语句<br>比如添加列/删除列<br>ALTER TABLE 表名 ADD/DROP 列名 VARCHAR（）；<br>变更名字：<br>ALTER TABLE 表名 RENAME TO 另外一个表名</p>
+<p>插入数据示意：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">SQL Server PostgreSQL</span><br><span class="line">-- DML ：插入数据</span><br><span class="line">BEGIN TRANSACTION;—————————①</span><br><span class="line">INSERT INTO Product VALUES (&#39;0001&#39;, &#39;T恤衫&#39;, &#39;衣服&#39;,</span><br><span class="line">1000, 500, &#39;2009-09-20&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0002&#39;, &#39;打孔器&#39;, &#39;办公用品&#39;,</span><br><span class="line">500, 320, &#39;2009-09-11&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0003&#39;, &#39;运动T恤&#39;, &#39;衣服&#39;,</span><br><span class="line">4000, 2800, NULL);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0004&#39;, &#39;菜刀&#39;, &#39;厨房用具&#39;,</span><br><span class="line">3000, 2800, &#39;2009-09-20&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0005&#39;, &#39;高压锅&#39;, &#39;厨房用具&#39;,</span><br><span class="line">6800, 5000, &#39;2009-01-15&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0006&#39;, &#39;叉子&#39;, &#39;厨房用具&#39;,</span><br><span class="line">500, NULL, &#39;2009-09-20&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0007&#39;, &#39;擦菜板&#39;, &#39;厨房用具&#39;,</span><br><span class="line">880, 790, &#39;2008-04-28&#39;);</span><br><span class="line">INSERT INTO Product VALUES (&#39;0008&#39;, &#39;圆珠笔&#39;, &#39;办公用品&#39;,</span><br><span class="line">100, NULL,&#39;2009-11-11&#39;);</span><br><span class="line">COMMIT;</span><br></pre></td></tr></table></figure>
+
+<h1 id="查询基础"><a href="#查询基础" class="headerlink" title="查询基础"></a>查询基础</h1><h2 id="SELECT-语句基础"><a href="#SELECT-语句基础" class="headerlink" title="SELECT 语句基础"></a>SELECT 语句基础</h2><p>从表中选取数据select<br>通过select语句查询并选取必要数据–query<br>获取表格中的一列：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT 列的名字</span><br><span class="line">From table;</span><br></pre></td></tr></table></figure>
+<p>查询所有列 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">From tablename;</span><br></pre></td></tr></table></figure>
+<p>关键词AS 设定别名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT xxx_id AS id,</span><br><span class="line">SELECT origin_name AS name；</span><br></pre></td></tr></table></figure>
+<p>这样列里面的名称就会 变化<br>注意 如果要设成中文就要加双引号 </p>
+<p>常数的查询</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT &#39;商品&#39; AS string,</span><br><span class="line">38            AS number,</span><br><span class="line">&#39;2009-02-24&#39;  AS date,</span><br><span class="line">product id,product name</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>从结果中删除重复行<br>用DISTINCT 语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT product_type</span><br><span class="line">from product;</span><br></pre></td></tr></table></figure>
+<p>对单列使用DISTINCT语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINC purchase_price</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>对多列使用DISTINCT</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINC purchase_price，registe_date</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+
+<p>根据where语句选择记录,WHERE 用来比较得到的结果和选择的是否相等<br>语法为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT &lt;列名&gt;, ……</span><br><span class="line"> FROM &lt;表名&gt;</span><br><span class="line"> WHERE &lt;条件表达式&gt;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,product_type</span><br><span class="line">FROM Product</span><br><span class="line">WHERE Product_type &#x3D; &#39;衣服&#39;;</span><br></pre></td></tr></table></figure>
+<p>注释的书写方式<br>一行注释</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">--本SELECT语句会从结果中删除重复行</span><br><span class="line">SELECT DISTINCT product_id,purchase_price</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>多行注释</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;*这是</span><br><span class="line">注释*&#x2F;</span><br></pre></td></tr></table></figure>
+<h2 id="算法运算符和比较运算符"><a href="#算法运算符和比较运算符" class="headerlink" title="算法运算符和比较运算符"></a>算法运算符和比较运算符</h2><p>乘法运算</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,</span><br><span class="line">sale_price,</span><br><span class="line">sale_price*2 AS &quot;sale_price_x2&quot;</span><br><span class="line">From Product;</span><br></pre></td></tr></table></figure>
+<p>NULL值怎么操作都是NULL</p>
+<p>比较运算符<br>不等于：<br>如果要选择单价为五百的商品名称和商品种类，代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,product_type</span><br><span class="line">From Product</span><br><span class="line">WHERE sale_price &#x3D; 500;</span><br></pre></td></tr></table></figure>
+<p>如果选择不为五百的，代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,product_type</span><br><span class="line">From Product</span><br><span class="line">WHERE sale_price &lt;&gt; 500;</span><br></pre></td></tr></table></figure>
+
+<p>大于等于：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,product_type</span><br><span class="line">From Product</span><br><span class="line">WHERE sale_price &gt;&#x3D; 500;</span><br></pre></td></tr></table></figure>
+
+<p>小于（选择某某日期之前）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,product_type,regis_date</span><br><span class="line">FROM Product</span><br><span class="line">WHERE regist_data &lt; &#39;2009-09-27&#39;;</span><br></pre></td></tr></table></figure>
+<p>获得销售单价大于进货单价500元以上的记录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,sale_price,purchase_price</span><br><span class="line">FROM Product</span><br><span class="line">WHERE sale_price - purchase_price &gt;&#x3D;500;</span><br></pre></td></tr></table></figure>
+
+<p>对字符串使用不等号的注意事项：<br>在一组字符串中选出大于2的数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT char</span><br><span class="line">FROM Chars</span><br><span class="line">WHERE chr&gt;&#39;2&#39;</span><br></pre></td></tr></table></figure>
+<p>比较的时候会按字符串的逻辑进行比较 而是按照字典顺寻(比如顺序为1 10 11 2 222 3)</p>
+<p>不能对NULL使用比较运算符<br>实际使用中如果一定要选取NULL的话,需要在条件语句后加上 IS NULL<br>希望选取的不是NULL的时候，在条件语句后加上IS NOT NULL</p>
+<h2 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h2><p>NOT运算符</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name,sale_price,purchase_price</span><br><span class="line">FROM Product</span><br><span class="line">WHERE NOT sale_price - purchase_price &gt;&#x3D;500;</span><br></pre></td></tr></table></figure>
+<p>和＜是相等的</p>
+<p>AND运算符 需要两侧查询都成立才成立<br>OR有一个条件成立就行<br>AND:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">--商品种类为“厨房用具”+销售单价大于等于3000日元</span><br><span class="line">SELECT product_name, purchase_price</span><br><span class="line">FROM Prodcut</span><br><span class="line">WHERE product_type &#x3D; &#39;厨房用具’</span><br><span class="line">AND sale_price &gt;&#x3D; 3000;</span><br></pre></td></tr></table></figure>
+<p>OR:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">--商品种类为“厨房用具”或销售单价大于等于3000日元</span><br><span class="line">SELECT product_name, purchase_price</span><br><span class="line">FROM Prodcut</span><br><span class="line">WHERE product_type &#x3D; &#39;厨房用具’</span><br><span class="line">AND sale_price &gt;&#x3D; 3000;</span><br></pre></td></tr></table></figure>
+<p>括号强化：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--使用括号，让运算符or先于and执行</span><br><span class="line">SELECt product_name, product type, regist_date</span><br><span class="line">FROM Product</span><br><span class="line">WHERE product_type &#x3D; &#39;办公用品&#39;</span><br><span class="line">AND (regist date &#x3D; &#39;2009-09-11</span><br><span class="line">or regist_date &#x3D; &#39;2009-09-20&#39;);</span><br></pre></td></tr></table></figure>
+<h2 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h2><ol>
+<li>编写一条 SQL 语句，从 Product（商品）表中选取出“登记日期（regist_<br>date）在 2009 年 4 月 28 日之后”的商品。查询结果要包含 product_<br>name 和 regist_date 两列。<br>A:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name, regist_date</span><br><span class="line">  FROM Product</span><br><span class="line"> WHERE regist_date &gt; &#39;2009-04-28&#39;;</span><br></pre></td></tr></table></figure></li>
+<li>请说出对 Product 表执行如下 3 条 SELECT 语句时的返回结果<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">① SELECT *</span><br><span class="line"> FROM Product</span><br><span class="line"> WHERE purchase_price &#x3D; NULL;</span><br><span class="line">② SELECT *</span><br><span class="line"> FROM Product</span><br><span class="line"> WHERE purchase_price &lt;&gt; NULL;</span><br><span class="line">③ SELECT *</span><br><span class="line"> FROM Product</span><br><span class="line"> WHERE product_name &gt; NULL;</span><br></pre></td></tr></table></figure>
+A: 略</li>
+<li>SELECT 语句能够从 Product 表中取出“销<br>售单价（sale_price）比进货单价（purchase_price）高出 500<br>日元以上”的商品。请写出两条可以得到相同结果的 SELECT 语句。执行<br>结果如下所示。<br>执行结果<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> product_name | sale_price | purchase_price</span><br><span class="line">---------------+-------------+----------------</span><br><span class="line">T恤衫         | 1000        | 500</span><br><span class="line">运动T恤       | 4000        | 2800</span><br><span class="line">高压锅        | 6800        | 5000</span><br></pre></td></tr></table></figure>
+A:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-- SELECT语句①</span><br><span class="line">SELECT product_name, sale_price, purchase_price</span><br><span class="line">  FROM Product</span><br><span class="line"> WHERE sale_price &gt;&#x3D; purchase_price + 500;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- SELECT语句②</span><br><span class="line">SELECT product_name, sale_price, purchase_price</span><br><span class="line">  FROM Product</span><br><span class="line"> WHERE sale_price - 500 &gt;&#x3D; purchase_price;</span><br></pre></td></tr></table></figure></li>
+<li>请写出一条 SELECT 语句，从 Product 表中选取出满足“销售单价打九 折之后利润高于 100 日元的办公用品和厨房用具”条件的记录。查询结果 要包括 product_name 列、product_type 列以及销售单价打九折之 后的利润（别名设定为 profit）。<br>A:<br>提示：销售单价打九折，可以通过 sale_price 列的值乘以 0.9 获得，利润可 以通过该值减去 purchase_price 列的值获得。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_name, product_type,</span><br><span class="line">       sale_price * 0.9 - purchase_price AS profit</span><br><span class="line">  FROM Product</span><br><span class="line"> WHERE sale_price * 0.9 - purchase_price &gt; 100</span><br><span class="line">   AND (   product_type &#x3D; &#39;办公用品&#39;</span><br><span class="line">        OR product_type &#x3D; &#39;厨房用具&#39;);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+</li>
+</ol>
+<h1 id="聚合与排序"><a href="#聚合与排序" class="headerlink" title="聚合与排序"></a>聚合与排序</h1><h2 id="对表进行聚合查询"><a href="#对表进行聚合查询" class="headerlink" title="对表进行聚合查询"></a>对表进行聚合查询</h2><p>COUNT 数行数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>例子创建三行NULL的表格查询整个的行数和某一列的行数，结果分别为3和0</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">shop&#x3D;# --创建新表格</span><br><span class="line">shop&#x3D;# CREATE TABLE NULLTBL</span><br><span class="line">shop-# (col_1  INTEGER NULL);</span><br><span class="line">CREATE TABLE</span><br><span class="line">shop&#x3D;# --插入三行NULL</span><br><span class="line">shop&#x3D;# BEGIN TRANSACTION;</span><br><span class="line">BEGIN</span><br><span class="line">shop&#x3D;# INSERT INTO NULLTBL VALUES(NULL);</span><br><span class="line">INSERT 0 1</span><br><span class="line">shop&#x3D;# INSERT INTO NULLTBL VALUES(NULL);</span><br><span class="line">INSERT 0 1</span><br><span class="line">shop&#x3D;# INSERT INTO NULLTBL VALUES(NULL);</span><br><span class="line">INSERT 0 1</span><br><span class="line">shop&#x3D;# COMMIT;</span><br><span class="line">COMMIT</span><br><span class="line">shop&#x3D;#</span><br><span class="line">shop&#x3D;#</span><br><span class="line">shop&#x3D;# SELECT COUNT(*),COUNT(col_1)</span><br><span class="line">shop-# FROM NULLTBL;</span><br></pre></td></tr></table></figure>
+<p>求和：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUM（sale_price), SUM(purchase_price)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>取平均:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT AVG(sale_price)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>取多列平均</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT AVG(sale_price), AVG(purchase_price)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>计算最值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT MAX(sale_price), MIN(purchase_price)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>有时候需要先使用DISTINCT去重后再计算有多少种类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT (DISTINCT product_type)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+<p>和下面这个结果是不一样的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT (COUNT product_type)</span><br><span class="line">FROM Product;</span><br></pre></td></tr></table></figure>
+
+<h2 id="对表进行分组"><a href="#对表进行分组" class="headerlink" title="对表进行分组"></a>对表进行分组</h2><p>GROUP BY 子句可以进行分组</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--按照商品种类统计数据</span><br><span class="line">SELECT product_type, COUNT(*)</span><br><span class="line">FROM Product</span><br><span class="line">GROUP BY product_type;</span><br></pre></td></tr></table></figure>
+
+
+<p>注意一下：在书写的时候顺序是SELECT，FROM，WHERE，GROUP BY<br>执行的时候顺寻是FROM，WHERE，GROUP BY， SELECT</p>
+<h2 id="为聚合结果指定条件"><a href="#为聚合结果指定条件" class="headerlink" title="为聚合结果指定条件"></a>为聚合结果指定条件</h2><p>书写顺序SELECT，FROM，WHERE，GROUP BY,HAVING<br>HAVING 子句<br>跟在group子句后面加条件<br>HAVING子句的构成要素</p>
+<h2 id="对查询结果进行排序"><a href="#对查询结果进行排序" class="headerlink" title="对查询结果进行排序"></a>对查询结果进行排序</h2><p>用ORDER BY字句<br>书写顺序SELECT，FROM，WHERE，GROUP BY,HAVING，ORDER BY</p>
+<p>指定升序和降序用ASC和DESC </p>
+<p>可以指定多个排序键</p>
+<p>排序键包含NULL时会在开头或者末尾进行汇总</p>
+<p>SQL在DBMS内部执行顺序：FROM-WHERE-GROUP BY-HAVING-SELECT-ORDER BY</p>
+<p>SELECT子句中未包含的子句也可以用ORDER BY里面用</p>
+<p>注意不要使用列编号</p>
+<h1 id="数据更新（先搁置）"><a href="#数据更新（先搁置）" class="headerlink" title="数据更新（先搁置）"></a>数据更新（先搁置）</h1><h2 id="数据的插入（INSERT）"><a href="#数据的插入（INSERT）" class="headerlink" title="数据的插入（INSERT）"></a>数据的插入（INSERT）</h2><h2 id="数据的删除（DELET"><a href="#数据的删除（DELET" class="headerlink" title="数据的删除（DELET)"></a>数据的删除（DELET)</h2><h2 id="数据的更新-UPDATE"><a href="#数据的更新-UPDATE" class="headerlink" title="数据的更新 UPDATE"></a>数据的更新 UPDATE</h2><h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><h1 id="复杂查询"><a href="#复杂查询" class="headerlink" title="复杂查询"></a>复杂查询</h1><h2 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h2><p>视图和表：<br>区别是是否保存了实际的数据<br>视图保存的是SELECT语句 表中保存的是实际的数据<br>可以节省容量 也可以将频繁使用的SELECT保存成视图<br>视图数据会随着原表变化自动更新<br>表中需要UPDATE才能更新<br>创建视图的方法(CREATE VIEW)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE VIEW ProductSum (product_type, cny_product)</span><br><span class="line">AS</span><br><span class="line">SELECT product_type, COUNT(*)</span><br><span class="line">FROM Product</span><br><span class="line">GROUP BY product_type;</span><br></pre></td></tr></table></figure>
+<p>第一行是视图里的列名<br>第二行AS不能省 和 重命名不一样<br>下面语句是主体</p>
+<p>在FROM子句中使用视图来代替表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_type, cnt_product</span><br><span class="line">FROM ProductSum;</span><br></pre></td></tr></table></figure>
+
+<p>在SQL里面，还可以以视图为基础创建多重视图<br>可以在刚刚那个视图ProductSum的基础上，再创建一个视图ProductSumJim</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CREATE VIEW ProductSumJim(product_type, cnt_product)</span><br><span class="line">AS</span><br><span class="line">SELECT product_type, cnt_product</span><br><span class="line">FROM ProductSum</span><br><span class="line">WHERE product_type &#x3D; &#39;办公用品&#39;</span><br><span class="line">CREATE VIEW</span><br><span class="line">SELECT product_type, cnt_product</span><br><span class="line">FROM ProductSumJim;</span><br></pre></td></tr></table></figure>
+
+
+<p>视图的限制1–定义视图时不能使用ORDER BY子句</p>
+<p>视图的限制2–对视图进行更新<br>删除视图 DROP VIEW + 视图的名字（如果不存在关联视图）<br>如果存在关联视图<br>就用<br>DROP VIEW 名字 CASCADE<br>可以递归删除</p>
+<h2 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h2><p>子查询和视图<br> 可以嵌套</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_id,product_name,sale_price</span><br><span class="line">FROM Product</span><br><span class="line">WHERE sale_price &gt; (SELECT AVG(sale_price) FROM Prodcut)</span><br></pre></td></tr></table></figure>
+<p>子查询名称<br>为子查询设定名称需要用AS<br>有时可以省略</p>
+<p>标量子查询：<br>返回单一值的子查询</p>
+<p>标量子查询的书写位置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_id,</span><br><span class="line">product_name,</span><br><span class="line">sale_price,</span><br><span class="line">(SELECT AVG(SALE_price)FROM Prodcut) AS avg_price --这里就是标量子查询 </span><br><span class="line">FROM Product；</span><br></pre></td></tr></table></figure>
+<p>使用标量子查询绝对不能返回多行结果</p>
+<p>关联子查询(可以对集合进行切分，结合条件一定写在嵌套内)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT product_type, product_name, sale_price</span><br><span class="line">FROM Product AS P1</span><br><span class="line">WHERE sale_price &gt; (SELECT AVG(sale_price)FROM Product AS P2 </span><br><span class="line">WHERE P1.product_type &#x3D;P2.product_type</span><br><span class="line">GROUP BY Product_type);</span><br></pre></td></tr></table></figure>
+
+<h1 id="函数、谓词、CASE表达式"><a href="#函数、谓词、CASE表达式" class="headerlink" title="函数、谓词、CASE表达式"></a>函数、谓词、CASE表达式</h1><h2 id="各式各样的函数"><a href="#各式各样的函数" class="headerlink" title="各式各样的函数"></a>各式各样的函数</h2><p>函数的种类：算术 字符串 日期 转换 聚合<br> 一些算术： ABS：绝对值 ；<br> MOD：求余<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELET n,p,</span><br><span class="line">MOD(n,p) AS mod_col</span><br><span class="line">FROM SampleMath;</span><br></pre></td></tr></table></figure><br> ROUND:四舍五入 m是对象数值，n是保留几位小数<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT m,n</span><br><span class="line">,</span><br><span class="line">ROUND(m,n)</span><br></pre></td></tr></table></figure><br> 字符串：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT str1,str2,str3,</span><br><span class="line">str1||str2||str3 AS str_concat</span><br><span class="line">FROM SampleStr</span><br><span class="line">WHERE str1&#x3D; &quot;山田&quot;</span><br></pre></td></tr></table></figure><br> 以上是个拼接的例子</p>
+<p> UPPER 大写<br> REPLACE 转换<br> SUBSTRING 字符串的截取<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT str1,</span><br><span class="line">SUBSTRING(str1 FROM 3 for 2) AS sub_str</span><br><span class="line">FROM SampleStr;</span><br></pre></td></tr></table></figure><br> 从第3个位置截取2个字符（截取第三和第四位字符）</p>
+<p> 日期函数：<br> CURRENT_DATE<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT CURRENT_DATE, CURRENT_TIME;</span><br><span class="line">--获取当前日期，时间</span><br></pre></td></tr></table></figure><br>这个函数无法在SQL——SERVER中执行<br>CURRENT_TIMESTAMP可以在SQLserver中使用<br>EXTRACT可以看具体的</p>
+<p>转换函数：<br>CAST</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT CAST(&#39;0001&#39;AS INTEGER) AS int_col</span><br></pre></td></tr></table></figure>
+<p>变成1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT CAST(&#39;2009-12-14&#39; AS DATE) AS date_col</span><br></pre></td></tr></table></figure>
+<p>本来是字符串类型，变成日期类型<br>COALESCE（将NULL转化为其他值）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT COALESCE(NULL,1) AS col_1</span><br><span class="line">           COALSCE(NULL, &quot;test&quot;, str) AS col_2</span><br></pre></td></tr></table></figure>
+<p>还可以用其变成其他值</p>
+<h2 id="谓词（predicate）"><a href="#谓词（predicate）" class="headerlink" title="谓词（predicate）"></a>谓词（predicate）</h2><p>谓词的返回值是真值<br>LIKE<br>BETWEEN<br>IS NULL<br>IS NOT NULL<br>IN<br>EXSIT</p>
+<h2 id="CASE-表达式"><a href="#CASE-表达式" class="headerlink" title="CASE 表达式"></a>CASE 表达式</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CASE WHEN&lt;求值表达式&gt;THEN&lt;表达式&gt;</span><br><span class="line">     WHEN&lt;求值表达式&gt;THEN&lt;表达式&gt;</span><br><span class="line">     WHEN&lt;求值表达式&gt;THEN&lt;表达式&gt;</span><br><span class="line"></span><br><span class="line"> END &#x2F; ELSE&lt;表达式&gt;</span><br></pre></td></tr></table></figure>
+<p>case 表达式可以进行行列转换</p>
+<h1 id="集合运算-UNION-INTERCEPT-EXCEPT"><a href="#集合运算-UNION-INTERCEPT-EXCEPT" class="headerlink" title="集合运算 UNION INTERCEPT EXCEPT"></a>集合运算 UNION INTERCEPT EXCEPT</h1><h2 id="表的加减法"><a href="#表的加减法" class="headerlink" title="表的加减法"></a>表的加减法</h2><p>UNION 语句<br>每一个UNION查询必须有相同的字段个数 列的类型必须一致</p>
+<p><strong>相关资源下载</strong>：<br> MICK-SQL基础教程<a href="download/MICK-SQL基础教程.pdf">点击下载</a><br> MICK-SQL进阶教程<a href="download/MICK-SQL进阶教程.pdf">点击下载</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SQL/" rel="tag"># SQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/27/jojo191217/" rel="prev" title="Stardust Crusaders">
+      <i class="fa fa-chevron-left"></i> Stardust Crusaders
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#绪论-搭建SQL的学习环境"><span class="nav-number">1.</span> <span class="nav-text">绪论-搭建SQL的学习环境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL的安装和连接设置"><span class="nav-number">1.1.</span> <span class="nav-text">PostgreSQL的安装和连接设置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据库和SQL"><span class="nav-number">2.</span> <span class="nav-text">数据库和SQL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库是什么"><span class="nav-number">2.1.</span> <span class="nav-text">数据库是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库的结构"><span class="nav-number">2.2.</span> <span class="nav-text">数据库的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL概要"><span class="nav-number">2.3.</span> <span class="nav-text">SQL概要</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查询基础"><span class="nav-number">3.</span> <span class="nav-text">查询基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT-语句基础"><span class="nav-number">3.1.</span> <span class="nav-text">SELECT 语句基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#算法运算符和比较运算符"><span class="nav-number">3.2.</span> <span class="nav-text">算法运算符和比较运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#逻辑运算符"><span class="nav-number">3.3.</span> <span class="nav-text">逻辑运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#练习题"><span class="nav-number">3.4.</span> <span class="nav-text">练习题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#聚合与排序"><span class="nav-number">4.</span> <span class="nav-text">聚合与排序</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#对表进行聚合查询"><span class="nav-number">4.1.</span> <span class="nav-text">对表进行聚合查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对表进行分组"><span class="nav-number">4.2.</span> <span class="nav-text">对表进行分组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为聚合结果指定条件"><span class="nav-number">4.3.</span> <span class="nav-text">为聚合结果指定条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对查询结果进行排序"><span class="nav-number">4.4.</span> <span class="nav-text">对查询结果进行排序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据更新（先搁置）"><span class="nav-number">5.</span> <span class="nav-text">数据更新（先搁置）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据的插入（INSERT）"><span class="nav-number">5.1.</span> <span class="nav-text">数据的插入（INSERT）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据的删除（DELET"><span class="nav-number">5.2.</span> <span class="nav-text">数据的删除（DELET)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据的更新-UPDATE"><span class="nav-number">5.3.</span> <span class="nav-text">数据的更新 UPDATE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务"><span class="nav-number">5.4.</span> <span class="nav-text">事务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#复杂查询"><span class="nav-number">6.</span> <span class="nav-text">复杂查询</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#视图"><span class="nav-number">6.1.</span> <span class="nav-text">视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#子查询"><span class="nav-number">6.2.</span> <span class="nav-text">子查询</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#函数、谓词、CASE表达式"><span class="nav-number">7.</span> <span class="nav-text">函数、谓词、CASE表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#各式各样的函数"><span class="nav-number">7.1.</span> <span class="nav-text">各式各样的函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#谓词（predicate）"><span class="nav-number">7.2.</span> <span class="nav-text">谓词（predicate）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CASE-表达式"><span class="nav-number">7.3.</span> <span class="nav-text">CASE 表达式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集合运算-UNION-INTERCEPT-EXCEPT"><span class="nav-number">8.</span> <span class="nav-text">集合运算 UNION INTERCEPT EXCEPT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#表的加减法"><span class="nav-number">8.1.</span> <span class="nav-text">表的加减法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Kevin Gao</p>
+  <div class="site-description" itemprop="description"></div>
+  
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+<div style="margin-top: 8em; position: absolute; bottom: 4em;">
+<p style="color: white;">欢迎访问我的好朋友们的网站：)</p>
+<div style="display: inline-block; max-width: 30%;"><a href="http://mageluer.coding.me" target="_blank" rel="noopener" title="Mageluer的游泳池"><img style="border-radius: 50%;" src="http://mageluer.coding.me/assets/img/public/avatar.jpg"></a></div>
+<div style="display: inline-block; max-width: 30%;"><a href="https://chenyifan-nt.github.io/" target="_blank" rel="noopener" title="我想玩丝之歌"><img style="border-radius: 50%;" src="https://chenyifan-nt.github.io/images/avatar.png"></a></div>
+
+
+</div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kevin Gao</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>
