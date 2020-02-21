@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="The World of Kevin Gao" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="原文链接https:&#x2F;&#x2F;www.cnblogs.com&#x2F;yi-mu-xi&#x2F;p&#x2F;10469458.html 固态硬盘的PCIE，SATA，M2，NVMe，AHCIM2 和 SATA我们常说的M2其实是M.2，更多是指一种尺寸或者插槽，就是上图中右边的尺寸较小的直接插主板上的这种，而SATA也是，通常是指上图左边那个尺寸较大的一大块那种 还要提的是M.2插槽也是有两种的，一种是金手指有两个缺口的Soc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NVMe">
+<meta property="og:url" content="http://yoursite.com/2020/02/21/NVMe/index.html">
+<meta property="og:site_name" content="The World of Kevin Gao">
+<meta property="og:description" content="原文链接https:&#x2F;&#x2F;www.cnblogs.com&#x2F;yi-mu-xi&#x2F;p&#x2F;10469458.html 固态硬盘的PCIE，SATA，M2，NVMe，AHCIM2 和 SATA我们常说的M2其实是M.2，更多是指一种尺寸或者插槽，就是上图中右边的尺寸较小的直接插主板上的这种，而SATA也是，通常是指上图左边那个尺寸较大的一大块那种 还要提的是M.2插槽也是有两种的，一种是金手指有两个缺口的Soc">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-21T10:26:14.000Z">
+<meta property="article:modified_time" content="2020-02-21T17:48:23.357Z">
+<meta property="article:author" content="Kevin Gao">
+<meta property="article:tag" content="Technology">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/02/21/NVMe/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>NVMe | The World of Kevin Gao</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">The World of Kevin Gao</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">咋瓦鲁多</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/21/NVMe/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Kevin Gao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The World of Kevin Gao">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NVMe<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/NVMe.md" class="post-edit-link" title="Edit this post" rel="noopener" target="_blank"><i class="fa fa-pencil"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-21 18:26:14" itemprop="dateCreated datePublished" datetime="2020-02-21T18:26:14+08:00">2020-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-22 01:48:23" itemprop="dateModified" datetime="2020-02-22T01:48:23+08:00">2020-02-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Technology/" itemprop="url" rel="index">
+                    <span itemprop="name">Technology</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文链接<a href="https://www.cnblogs.com/yi-mu-xi/p/10469458.html" target="_blank" rel="noopener">https://www.cnblogs.com/yi-mu-xi/p/10469458.html</a></p>
+<h2 id="固态硬盘的PCIE，SATA，M2，NVMe，AHCI"><a href="#固态硬盘的PCIE，SATA，M2，NVMe，AHCI" class="headerlink" title="固态硬盘的PCIE，SATA，M2，NVMe，AHCI"></a>固态硬盘的PCIE，SATA，M2，NVMe，AHCI</h2><h2 id="M2-和-SATA"><a href="#M2-和-SATA" class="headerlink" title="M2 和 SATA"></a>M2 和 SATA</h2><p>我们常说的M2其实是M.2，更多是指一种尺寸或者插槽，就是上图中右边的尺寸较小的直接插主板上的这种，而SATA也是，通常是指上图左边那个尺寸较大的一大块那种</p>
+<p>还要提的是M.2插槽也是有两种的，一种是金手指有两个缺口的Socket 2跟金手指只有一个缺口的Socket 3，这两种可以走不同的通道</p>
+<h2 id="SATA和PCIE"><a href="#SATA和PCIE" class="headerlink" title="SATA和PCIE"></a>SATA和PCIE</h2><p>串行高级技术附件的全称是Serial Advanced Technology Attachment（串行高级技术附件，一种基于行业标准的串行硬件驱动器接口）就是我们现在经常所说的SATA，是由Intel、IBM、Dell、APT、Maxtor和Seagate公司共同提出的硬盘接口规范。<br>PCI-Express(peripheral component interconnect express)是一种高速串行计算机扩展总线标准，它原来的名称为“3GIO”，是由英特尔在2001年提出的，旨在替代旧的PCI，PCI-X和AGP总线标准。<br>PCIe属于高速串行点对点双通道高带宽传输，所连接的设备分配独享通道带宽，不共享总线带宽，主要支持主动电源管理，错误报告，端对端的可靠性传输，热插拔以及服务质量(QOS)等功能。<br>PCIe交由PCI-SIG（PCI特殊兴趣组织）认证发布后才改名为“PCI-Express”，简称“PCI-e”。它的主要优势就是数据传输速率高，而且还有相当大的发展潜力。<br>PCI Express也有多种规格，从PCI Express x1到PCI Express x32，能满足将来一定时间内出现的低速设备和高速设备的需求。PCI-Express最新的接口是PCIe 3.0接口，其比特率为8Gbps，约为上一代产品带宽的两倍，并且包含发射器和接收器均衡、PLL改善以及时钟数据恢复等一系列重要的新功能，用以改善数据传输和数据保护性能。<br>PCIe闪存卡的供应商包括：INTEL、IBM、LSI、OCZ、三星(计划中)、SanDisk、STEC、SuperTalent和东芝(计划中)等，而针对海量的数据增长使得用户对规模更大、可扩展性更强的系统所应用，PCIe 3.0技术的加入最新的LSI MegaRAID控制器及HBA产品的出色性能，就可以实现更大的系统设计灵活性。截止2019年1月份，当前主流主板均支持pcie 3.0。<br>SATA跟PCIE，这两个东西是指串行接口或者就是数据走的通道；SATA更多是指插槽，而这里的SATA是指数据走的通道，目前的新设备普遍都是SATA3接口了，但是SATA3是向下兼容SATA2跟SATA1的<br>PCI-E跟SATA3简单说就是数据走的“路”，PCI-E就像是特别宽大的路，数据可以走的特别快，而SATA3与之相比更像是一条崎岖的小路，数据走的特别慢，但是CPU内部就那么大一点，修不了特别多的大路，所以PCI-E通道也就仅有那么几条。<br>通常SATA的插槽只能走SATA3的通道，</p>
+<p>而M.2的插槽上文我们说了分为Socket 2跟Socket 3，</p>
+<p>M.2（Socket 2）的固态可以走SATA3或者PCI-E 3.0×2通道(就是两条PCI-E)，而M.2（Socket 3）的固态则可以走PCI-E 3.0×4通道。</p>
+<p>需要说的是每条PCI-E 3.0的带宽是8Gbps，而SATA 3.0的带宽则只有6Gbps</p>
+<h2 id="NVME和AHCI"><a href="#NVME和AHCI" class="headerlink" title="NVME和AHCI"></a>NVME和AHCI</h2><p>高级主机控制器接口（英文：Advanced Host Controller Interface，缩写：AHCI），是一种由英特尔制定的技术标准，它允许软件与SATA存储设备沟通的硬件机制，可让SATA存储设备激活高级SATA功能，例如原生指令队列及热插拔。AHCI详细定义一个存储器架构规范给予硬件制造商，规范如何在系统存储器与SATA存储设备间传输数据，目前（2014年3月）最新AHCI规范为1.3.1版。<br>许多SATA设备控制器可个别激活AHCI功能或与RAID功能合并使用，英特尔就建议如果在其支持AHCI芯片组上使用RAID功能，采取AHCI模式组建RAID可以获得最大弹性，因为AHCI可在完成安装的操作系统中切换RAID组建模式。<br>在一般硬盘上，大多数制造商均在3.5英寸及2.5英寸提供相关支持技术。<br>NVM Express （Non-Volatile Memory express ）是标准和信息的开放收集，以充分展示非易失性存储器在从移动设备到数据中心的所有类型的计算环境中的优势。NVMe从头开始设计，可为当前和将来的NVM技术提供高带宽和低延迟的存储访问。NVM Express标准包括：<br>NVM Express –用于PCI Express附加存储的寄存器接口和命令集，以及适用于多种操作系统的行业标准软件。NVMe被广泛认为是PCIeSSD的事实上的行业标准。NVMe管理界面–用于NVM Express存储的带外管理的命令集和体系结构（例如，使用BMC发现，监视和更新NVMe设备）。架构上的NVMe – NVM Express的扩展，可通过PCIe以外的其他传输方式对NVM Express命令集进行隧道传输。NVMe over Fabric通过允许同一协议扩展到各种网络接口上，扩展了在全球最大的数据中心中大规模高效存储架构的优势。<br>最后要说的就是经常被商家拿来当作卖点的NVMe了，其实NVMe跟AHCI都是一种规范，就像是在路上走如果没有交通规则的限制，那么肯定是一团拥挤肯定都走不动了，而NVMe跟AHCI就像是这种交通规则<br>AHIC是针对SATA这种弯路的交通规则，然后开发者发现，这种针对弯路的规范，数据只能一个一个通过的规则用在宽敞的PCIE通道上面实在太浪费了，于是针对PCIE通道又开发出了NVME规范，可以让很多数据同时通过<br>总结：M.2跟SATA其实可以说是插槽的形状，而PCI-E跟SATA3就是数据从硬盘到CPU或者内存走的通道，而NVME跟AHCI就是针对PCI-E跟SATA通道的“交通规则”</p>
+<h2 id="NVME"><a href="#NVME" class="headerlink" title="NVME"></a>NVME</h2><p>NVMe其实与AHCI一样都是逻辑设备接口标准（是接口标准，不是接口！不是接口！不是接口！因为很重要所以说三次），NVMe全称Non-Volatile Memory Express，非易失性存储器标准，是使用PCI-E通道的SSD一种规范，NVMe的设计之初就有充分利用到PCI-E SSD的低延时以及并行性，还有当代处理器、平台与应用的并行性。SSD的并行性可以充分被主机的硬件与软件充分利用，相比与现在的AHCI标准，NVMe标准可以带来多方面的性能提升。</p>
+<pre><code>NVMe的官方定义将其描述为“一个开放的标准和信息集合，以充分释放非易失性存储在从移动端到数据中心的所有类型的计算环境中能够提供的优势。NVMe从底层开始设计，为当前和未来的NVM技术提供高带宽和低延迟存储访问。”NVMe是通过PCI Express总线将存储连接到服务器的接口规范，简单来说就是，使SSD与主机系统通信的速度更快。它有助于缓解闪存通过最初为HDD设计的SAS或SATA连接到系统时出现的瓶颈。</code></pre><a id="more"></a>
+
+<p>NVME介绍<br>1.NVMe的由来<br>现在所用的SATA接口与AHCI标准其实是为高延时的机械硬盘而设计的，目前主流SSD依然继续使用它们，早期SSD性能不高时可能还不觉得有什么问题，但是随着SSD的性能逐渐增强，这些标准已经成为限制SSD的一大瓶颈，专为机械硬盘而设计的AHCI标准并不太适合低延时的SSD。</p>
+<p>当然，业界早就意识到这一问题，2009年下半年，关于NVMe的技术工作正式启动，NVMe规范由包含90多家公司在内的工作小组所定制，Intel是主要领头人，小组成员包括美光、戴尔、三星、Marvell、NetAPP、EMC、IDT等公司，目的就是为SSD建立新的存储规范标准，让它在老旧的SATA与AHCI中解放出来。</p>
+<p>2011年，NVMe标准正式出炉，该标准是根据闪存存储的特点量身定制的，新的标准解除了旧标准施放在SSD上的各种限制。2012年标准升级到NVMe 1.1，最新的NVMe 1.2标准是在2014所推出的。</p>
+<p>首款支持NVMe标准的产品是三星XS1715，与2013年7月所发布，随后陆续有企业级的NVMe标准SSD推出，直到今年Intel 750发布，NVMe标准的产品才开始进入消费级市场。</p>
+<p>2、NVMe的速度远远快于SATA或SAS<br>　　NVMe控制器通过几种不同的方式提高性能。一种是使用PCIe总线，它将存储直接连接到系统CPU。这种直接连接消除了SATA的一些必要步骤，并提高了整体性能。</p>
+<p>　　此外，NVMe SSD在很大程度上实现了并行性，极大地提高了吞吐量。当数据从存储传输到服务器主机时，它会进入一行或队列。传统的SATA连接只能支持一个队列，一次只能接收32条数据。再回到车的类比上，这就像只有一条车道的车流可以容纳32辆车。</p>
+<p>　　而NVMe存储支持最多64000个队列，每个队列有64000个条目。换句话说，这就像从一条单行道走到一条6.4万车道的路上，每条车道都能容纳6.4万辆汽车，这对整体表现产生了巨大的影响。</p>
+<p>　　正如我们的类比中说城市道路一般限速在几十公里每小时一样，SATA和SAS连接也有速度限制。对于SATA，理论最大传输速度为6.0 Gbps(在实践中，最大传输速度要低得多)。这就相当于给SATA SSD的运行速度设定了上限。超过一定限度，使用再快的闪存对系统的整体性能没有影响，因为SATA连接会造成瓶颈。</p>
+<p>　　对于大多数消费者来说，SATA SSD提供了足够的性能来完成日常工作。而且由于SATA SSD比NVMe SSD便宜，大多数消费者级别的固态存储仍然使用SATA接口。</p>
+<p>　　然而，企业处理的数据通常比消费者多得多，对他们来说，SATA连接带来的延迟可能会成为一个问题。</p>
+<p>英特尔750系列是支持NVMe技术的固态硬盘产品之一</p>
+<p>　　3、只有SSD运行在NVMe上</p>
+<p>　　因为NVMe驱动器要比SATA快得多，所以将NVMe与HDD放在一起使用来提高性能似乎是个好主意。但是请记住，NVMe代表非易失性存储接口规范，它是专门为NAND 闪存等非易失性存储设计的(尽管它也可以用于较新的非易失性内存，比如3D XPoint)。</p>
+<p>　　当系统从HDD读取数据时，它一次只能读取一块数据。因为它必须进行旋转以定位到第一个数据块的正确物理位置，然后再次旋转，移动到第二个数据块的正确位置，以此类推。另一方面，闪存和其他非易失性存储技术没有移动部件。这意味着系统可以同时从许多不同的位置读取数据。这就是为什么SSD可以利用NVMe提供的并行性，而HDD不能。</p>
+<p>　　4、PCIe和NVMe有关系，但它们不是同一个东西</p>
+<p>　　对于很多人来说，NVMe最令人困惑的部分是它与PCIe的关系。一些厂商使用NVMe作为标签来指代他们的SSD，另外一些厂商则使用PCIe标签，还有一些厂商似乎可以互换使用这些术语。</p>
+<p>　　虽然PCIe和NVMe密切相关，但两个术语指的是略有不同的技术。可以将PCIe看作是系统的物理部分。当您将一个NVMe SSD插入服务器时，您需要通过一个PCIe插槽连接它。</p>
+<p>　　相比之下，NVMe是一种协议，是一组允许SSD使用PCIe总线的软硬件标准。可以这么说，NVMe是允许存储设备与服务器连接的语言，而PCIe是实际的物理连接。</p>
+<p>　　5、NVMe-oF连接SSD到网络<br>　　本文主要关注的是标准的NVMe，它将SSD直接连接到服务器，但是NVM Express组织也发布了NVMe over Fabric (NVMe- oF)的规范，它将用于块存储的非易失性存储连接到网络。根据该组织的说法，“NVMe- oF定义了一个通用架构，它支持一系列存储网络结构，用于存储网络结构之上的NVMe块存储协议。”这包括在存储系统中启用前端接口，扩展到大量NVMe设备，并在数据中心内延长NVMe设备和NVMe子系统可访问的距离。</p>
+<p>　　NVMe-oF规范与NVMe规范有大约90%的相同;然而，它确实使用了一种不同的传输映射机制。NVME-oF也有两种不同的变体:一种用于RDMA，另一种用于光纤通道。</p>
+<p>　　NVMe-oF规范也比NVMe规范新得多，尽管一些厂商已经宣布支持这项技术，但实际上很少有厂商销售NVMe的产品。期待这种技术在未来几年变得更加普遍。<br>NVME的优势总结<br>1、NVMe的优势一：低延时</p>
+<p>说到NVMe标准对比AHCI标准的优势，其中之一就是低延时，看上图比较直观，NVMe标准是面向PCI-E SSD的，使用原生PCI-E通道与CPU直连可以免去SATA与SAS接口的外置控制器（PCH）与CPU通信所带来的延时。</p>
+<p>在软件层方面，NVMe标准的延时只有AHCI的一半不到，NVMe精简了调用方式，执行命令时不需要读取寄存器；而AHCI每条命令则需要读取4次寄存器，一共会消耗8000次CPU循环，从而造成大概2.5微秒的延迟。</p>
+<p>更低的延时可让SSD的4KB QD1传输能力暴涨</p>
+<p>2、NVMe的优势二：IOPS大增</p>
+<p>另外NVMe也大大的提升了SSD的IOPS性能，在制定AHCI规范时并行性的想法并没有完全融合到规范内，利用NCQ功能可以对传输能力进行优化，但是接口并不允许SSD真正最大限度地发挥其应有的并行性。</p>
+<p>现在SSD测试通常最多只会测试到队列深度为32的IOPS能力，其实终究原因这是AHCI的上限，其实许多闪存主控可以提供更好的队列深度。而NVMe则可以把最大队列深度从32提升到64000，SSD的IOPS能力也会得到大幅提升。</p>
+<p>NVMe还支持同一时间从多核处理器接受命令和优先处理请求，这个特性在企业级的重负载时优势就会显露出来。</p>
+<p>低延时和良好的并行性的优势就是可以让SSD的随机性能得到大幅度提升，我们测试过的Intel 750就是一块NVMe SSD，它的随机性能表现绝对是一流的，在任何队列深度下都能发挥出极佳的速度。</p>
+<p>3、NVMe的优势三：功耗更低</p>
+<p>NVMe加入了自动功耗状态切换和动态能耗管理功能，设备从Power State 0闲置50ms后可以切换到Power State 1，继续闲置的话，在500ms后又会进入功耗更低的Power State 2，切换时会有短暂延迟。SSD在闲置时可以非常快速的控制在极低的水平，在功耗管理上NVMe标准的SSD会比现在主流的AHCI SSD拥有较大优势，这一点对移动设备来说尤其重要，可以显著增加笔记本和平板电脑的续航能力。</p>
+<p>4、NVMe的优势四：驱动适用性广</p>
+<p>驱动程序的兼容性也是所有PCI-E SSD的一个共有问题，每个产品都有对应不同系统的专用驱动，这方面有些厂商做的非常出色，而另一些则 不怎么样，然而许多PCI-E SSD需要加载驱动才能够正常引导。</p>
+<p>NVMe标准的出现解决了这个问题，NVMe SSD可以很方便的匹配不同的平台、系统，无需厂家提供相应的驱动就可以正常工作，目前Windows、Linux、Solaris、Unix、VMware、UEFI等都加入了对NVMe SSD的支持。当然Intel的产品拥有自己的驱动程序，不安装Intel驱动的话SSD能正常工作，但是性能不能完全发挥，之前测试Intel 750时就有这个问题，其他厂商的不知道怎么样。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Technology/" rel="tag"># Technology</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/31/new-device/" rel="prev" title="new devide">
+      <i class="fa fa-chevron-left"></i> new devide
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#固态硬盘的PCIE，SATA，M2，NVMe，AHCI"><span class="nav-number">1.</span> <span class="nav-text">固态硬盘的PCIE，SATA，M2，NVMe，AHCI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#M2-和-SATA"><span class="nav-number">2.</span> <span class="nav-text">M2 和 SATA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SATA和PCIE"><span class="nav-number">3.</span> <span class="nav-text">SATA和PCIE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NVME和AHCI"><span class="nav-number">4.</span> <span class="nav-text">NVME和AHCI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NVME"><span class="nav-number">5.</span> <span class="nav-text">NVME</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Kevin Gao</p>
+  <div class="site-description" itemprop="description"></div>
+  
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+<div style="margin-top: 8em; position: absolute; bottom: 4em;">
+<p style="color: white;">欢迎访问我的好朋友们的网站：)</p>
+<div style="display: inline-block; max-width: 30%;"><a href="http://mageluer.coding.me" target="_blank" rel="noopener" title="Mageluer的游泳池"><img style="border-radius: 50%;" src="http://mageluer.coding.me/assets/img/public/avatar.jpg"></a></div>
+<div style="display: inline-block; max-width: 30%;"><a href="https://chenyifan-nt.github.io/" target="_blank" rel="noopener" title="我想玩丝之歌"><img style="border-radius: 50%;" src="https://chenyifan-nt.github.io/images/avatar.png"></a></div>
+
+
+</div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kevin Gao</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
